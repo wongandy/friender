@@ -41,4 +41,33 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function friendsTo()
+    {
+        return $this->belongsToMany(User::class, 'friends', 'user_id', 'friend_id')->withTimestamps();
+    }
+
+    public function friendsFrom()
+    {
+        return $this->belongsToMany(User::class, 'friends', 'friend_id', 'user_id')->withTimestamps();
+    }
+
+    public function hasPendingFriendRequestTo(User $user)
+    {
+        return $this->friendsTo->contains($user->id);
+    }
+
+    public function hasPendingFriendRequestFrom(User $user)
+    {
+        return $this->friendsFrom->contains($user->id);
+    }
+
+    public function acceptFriendsFrom(User $user)
+    {
+        return $this->friendsFrom()->updateExistingPivot($user, [
+            'accepted' => true
+        ]);
+    }
+
+    // public function isFriends
 }
