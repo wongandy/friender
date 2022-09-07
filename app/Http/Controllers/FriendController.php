@@ -50,7 +50,9 @@ class FriendController extends Controller
      */
     public function update(User $user, Request $request)
     {
-        $request->user()->acceptFriendsFrom($user);
+        $request->user()->friendsFrom()->updateExistingPivot($user, [
+            'accepted' => 1
+        ]);
 
         return back();
     }
