@@ -11,6 +11,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
+    use \Staudenmeir\LaravelMergedRelations\Eloquent\HasMergedRelationships;
 
     /**
      * The attributes that are mass assignable.
@@ -62,12 +63,23 @@ class User extends Authenticatable
         return $this->friendsFrom->contains($user->id);
     }
 
-    public function acceptFriendsFrom(User $user)
+    public function acceptedFriendsTo()
     {
-        return $this->friendsFrom()->updateExistingPivot($user, [
-            'accepted' => true
-        ]);
+        return $this->friendsTo()->wherePivot('accepted', true);
     }
 
-    // public function isFriends
+    public function acceptedFriendsFrom()
+    {
+        return $this->friendsFrom()->wherePivot('accepted', true);
+    }
+
+    public function friends()
+    {
+        return $this->mergedRelationWithModel(User::class, 'friends_view');
+    }
+
+    public function isFriendsWith(User $user)
+    {
+        return $this->friends->contains($user->id);
+    }
 }
