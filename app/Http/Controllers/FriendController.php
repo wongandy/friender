@@ -15,7 +15,11 @@ class FriendController extends Controller
      */
     public function index()
     {
-        //
+        return view('friends.index', [
+            'friends' => auth()->user()->friends,
+            'friendsFrom' => auth()->user()->pendingFriendsFrom,
+            'friendsTo' => auth()->user()->pendingFriendsTo,
+        ]);
     }
 
     /**
@@ -36,6 +40,10 @@ class FriendController extends Controller
      */
     public function store(User $user, Request $request)
     {
+        if ($request->user()->ownsProfile($user) || $request->user()->hasPendingFriendRequestTo($user)) {
+            abort(404);
+        }
+
         $request->user()->friendsTo()->attach($user);
 
         return back();

@@ -24,11 +24,12 @@ Route::group(['middleware' => 'auth'], function () {
         return view('dashboard');
     })->name('dashboard');
 
-    Route::get('/profile/{user}', ProfileController::class);
+    Route::get('/profile/{user}', ProfileController::class)->name('profile');
 
-    Route::post('/friend/{user}', [FriendController::class, 'store'])->name('friend.store');
-    Route::patch('/friend/{user}', [FriendController::class, 'update'])->name('friend.update');
-    Route::delete('/friend/{user}', [FriendController::class, 'destroy'])->name('friend.destroy');
+    Route::get('/friends', [FriendController::class, 'index'])->name('friends.index');
+    Route::post('/friends/{user}', [FriendController::class, 'store'])->name('friends.store');
+    Route::patch('/friends/{user}', [FriendController::class, 'update'])->name('friends.update');
+    Route::delete('/friends/{user}', [FriendController::class, 'destroy'])->name('friends.destroy');
 });
 
 
