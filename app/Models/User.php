@@ -11,6 +11,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
+    use \Staudenmeir\LaravelMergedRelations\Eloquent\HasMergedRelationships;
 
     /**
      * The attributes that are mass assignable.
@@ -41,4 +42,59 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function ownsProfile(User $user)
+    {
+        return $this->id === $user->id;
+    }
+
+    public function friendsTo()
+    {
+        return $this->belongsToMany(User::class, 'friends', 'user_id', 'friend_id')->withTimestamps();
+    }
+
+    public function friendsFrom()
+    {
+        return $this->belongsToMany(User::class, 'friends', 'friend_id', 'user_id')->withTimestamps();
+    }
+
+    public function pendingFriendsTo()
+    {
+        return $this->friendsTo()->wherePivot('accepted', false);
+    }
+
+    public function pendingFriendsFrom()
+    {
+        return $this->friendsFrom()->wherePivot('accepted', false);
+    }
+
+    public function hasPendingFriendRequestTo(User $user)
+    {
+        return $this->friendsTo->contains($user->id);
+    }
+
+    public function hasPendingFriendRequestFrom(User $user)
+    {
+        return $this->friendsFrom->contains($user->id);
+    }
+
+    public function acceptedFriendsTo()
+    {
+        return $this->friendsTo()->wherePivot('accepted', true);
+    }
+
+    public function acceptedFriendsFrom()
+    {
+        return $this->friendsFrom()->wherePivot('accepted', true);
+    }
+
+    public function friends()
+    {
+        return $this->mergedRelationWithModel(User::class, 'friends_view');
+    }
+
+    public function isFriendsWith(User $user)
+    {
+        return $this->friends->contains($user->id);
+    }
 }
