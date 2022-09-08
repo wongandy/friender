@@ -43,6 +43,11 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    public function ownsProfile(User $user)
+    {
+        return $this->id === $user->id;
+    }
+
     public function friendsTo()
     {
         return $this->belongsToMany(User::class, 'friends', 'user_id', 'friend_id')->withTimestamps();
@@ -51,6 +56,16 @@ class User extends Authenticatable
     public function friendsFrom()
     {
         return $this->belongsToMany(User::class, 'friends', 'friend_id', 'user_id')->withTimestamps();
+    }
+
+    public function pendingFriendsTo()
+    {
+        return $this->friendsTo()->wherePivot('accepted', false);
+    }
+
+    public function pendingFriendsFrom()
+    {
+        return $this->friendsFrom()->wherePivot('accepted', false);
     }
 
     public function hasPendingFriendRequestTo(User $user)
